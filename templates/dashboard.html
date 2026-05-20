@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Neonatal Risk Clinical Dashboard</title>
+
+    <style>
+        body { font-family: Arial; background: #f4f6f9; }
+        .container { width: 80%; margin: auto; }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .risk-box {
+            padding: 15px;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .green { background: #28a745; }
+        .orange { background: #fd7e14; }
+        .red { background: #dc3545; }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>🧠 Neonatal Risk Prediction Dashboard (Maternal Epilepsy)</h2>
+
+<!-- INPUT CARD -->
+<div class="card">
+<form action="/predict" method="post">
+
+    <h3>Maternal Clinical Inputs</h3>
+
+    Age: <input type="number" name="age" required>
+    BMI: <input type="number" name="bmi" required>
+    Seizure Frequency: <input type="number" name="seizure" required>
+    Epilepsy Duration: <input type="number" name="duration" required>
+    Drug Dosage: <input type="number" name="dosage" required>
+    Gestational Age: <input type="number" name="gest_age" required>
+
+    Education:
+    <select name="education">
+        <option>Primary</option>
+        <option>Secondary</option>
+        <option>Tertiary</option>
+    </select>
+
+    Epilepsy Type:
+    <select name="epilepsy">
+        <option>Focal</option>
+        <option>Generalized</option>
+    </select>
+
+    Medication:
+    <select name="medication">
+        <option>Levetiracetam</option>
+        <option>Lamotrigine</option>
+        <option>Valproate</option>
+    </select>
+
+    Therapy:
+    <select name="therapy">
+        <option>Monotherapy</option>
+        <option>Polytherapy</option>
+    </select>
+
+    Hypertension:
+    <select name="hypertension"><option value="0">No</option><option value="1">Yes</option></select>
+
+    Diabetes:
+    <select name="diabetes"><option value="0">No</option><option value="1">Yes</option></select>
+
+    Smoking:
+    <select name="smoking"><option value="0">No</option><option value="1">Yes</option></select>
+
+    Alcohol:
+    <select name="alcohol"><option value="0">No</option><option value="1">Yes</option></select>
+
+    <button type="submit">Predict Risk</button>
+</form>
+</div>
+
+<!-- OUTPUT CARD -->
+{% if prediction_text %}
+
+<div class="card">
+
+    <h3>📊 Prediction Result</h3>
+
+    <div class="risk-box {{ color }}">
+        {{ risk_level }}
+    </div>
+
+    <p><b>Probability:</b> {{ probability }}%</p>
+
+    <p><b>Model Decision:</b> {{ prediction_text }}</p>
+
+</div>
+
+<!-- SHAP EXPLANATION -->
+<div class="card">
+    <h3>🔍 Explainable AI (SHAP)</h3>
+    <img src="{{ shap_image }}" width="100%">
+</div>
+
+{% endif %}
+
+</div>
+
+</body>
+</html>

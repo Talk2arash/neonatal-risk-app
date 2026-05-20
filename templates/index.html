@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Neonatal Risk Prediction System</title>
+</head>
+
+<body>
+
+<h2>Neonatal Risk Prediction (Maternal Epilepsy)</h2>
+
+<form action="/predict" method="post">
+
+    <!-- NUMERIC INPUTS -->
+    Maternal Age:
+    <input type="number" name="maternal_age" required><br><br>
+
+    BMI:
+    <input type="number" step="0.1" name="BMI" required><br><br>
+
+    Seizure Frequency:
+    <input type="number" name="seizure_frequency" required><br><br>
+
+    Duration of Epilepsy (years):
+    <input type="number" name="duration" required><br><br>
+
+    Drug Dosage:
+    <input type="number" name="drug_dosage" required><br><br>
+
+    Gestational Age:
+    <input type="number" name="gestational_age" required><br><br>
+
+
+    <!-- DROPDOWNS (IMPORTANT IMPROVEMENT) -->
+
+    Education Level:
+    <select name="education">
+        <option value="Primary">Primary</option>
+        <option value="Secondary">Secondary</option>
+        <option value="Tertiary">Tertiary</option>
+    </select><br><br>
+
+    Epilepsy Type:
+    <select name="epilepsy_type">
+        <option value="Focal">Focal</option>
+        <option value="Generalized">Generalized</option>
+    </select><br><br>
+
+    Medication Type:
+    <select name="medication_type">
+        <option value="Levetiracetam">Levetiracetam</option>
+        <option value="Lamotrigine">Lamotrigine</option>
+        <option value="Valproate">Valproate</option>
+    </select><br><br>
+
+    Therapy Type:
+    <select name="therapy_type">
+        <option value="Monotherapy">Monotherapy</option>
+        <option value="Polytherapy">Polytherapy</option>
+    </select><br><br>
+
+    Hypertension:
+    <select name="hypertension">
+        <option value="0">No</option>
+        <option value="1">Yes</option>
+    </select><br><br>
+
+    Diabetes:
+    <select name="diabetes">
+        <option value="0">No</option>
+        <option value="1">Yes</option>
+    </select><br><br>
+
+    Smoking:
+    <select name="smoking">
+        <option value="0">No</option>
+        <option value="1">Yes</option>
+    </select><br><br>
+
+    Alcohol Use:
+    <select name="alcohol">
+        <option value="0">No</option>
+        <option value="1">Yes</option>
+    </select><br><br>
+
+    <button type="submit">Predict Risk</button>
+
+</form>
+
+<h3>{{ prediction_text }}</h3>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clinical Results Dashboard</title>
+</head>
+
+<body style="font-family: Arial; background:#f4f6f9;">
+
+<div style="width:80%; margin:auto;">
+
+<h2>🧠 Neonatal Risk Results Dashboard</h2>
+
+<!-- RISK CARD -->
+<div style="background:white; padding:20px; border-radius:10px; margin-top:20px;">
+
+    <h3>Risk Level:
+        <span style="color: {{ color }}">{{ risk_level }}</span>
+    </h3>
+
+    <p><b>Probability:</b> {{ probability }}%</p>
+
+</div>
+
+<!-- SHAP TEXT -->
+<div style="background:white; padding:20px; margin-top:20px; border-radius:10px;">
+    <h3>🔍 Clinical Explanation</h3>
+    <p>{{ shap_text }}</p>
+</div>
+
+<!-- WATERFALL -->
+<div style="background:white; padding:20px; margin-top:20px; border-radius:10px;">
+    <h3>📉 Patient-Level Explanation (Waterfall)</h3>
+    <img src="{{ waterfall }}" width="100%">
+</div>
+
+<!-- BAR PLOT -->
+<div style="background:white; padding:20px; margin-top:20px; border-radius:10px;">
+    <h3>📊 Feature Contribution (Bar Plot)</h3>
+    <img src="{{ bar }}" width="100%">
+</div>
+
+<!-- BACK BUTTON -->
+<br>
+<a href="/">
+    <button style="padding:10px; background:#007bff; color:white;">
+        ← Back to Input
+    </button>
+</a>
+
+</div>
+<!-- DOWNLOAD REPORT -->
+<div style="background:white; padding:20px; margin-top:20px; border-radius:10px; text-align:center;">
+
+    <h3>📄 Medical Report</h3>
+
+    <a href="/download_report/{{ report_file }}">
+        <button style="
+            padding:12px;
+            background:#28a745;
+            color:white;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            width:60%;
+        ">
+            Download PDF Medical Report
+        </button>
+    </a>
+
+</div>
+</body>
+</html>
