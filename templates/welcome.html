@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neonatal Risk Prediction System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .bg-animation span {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 15s infinite;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: translateY(-100px) rotate(180deg) scale(1.5);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(0) rotate(360deg) scale(1);
+                opacity: 0.5;
+            }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Main Content Cards */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+        }
+        
+        .card h2 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card h2 .icon {
+            font-size: 2rem;
+        }
+        
+        .card p {
+            color: #666;
+            line-height: 1.8;
+            font-size: 1.05rem;
+            margin-bottom: 15px;
+        }
+        
+        .card ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .card ul li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card ul li:last-child {
+            border-bottom: none;
+        }
+        
+        .card ul li .check {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        
+        /* Model Performance Table */
+        .performance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .performance-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .performance-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+        }
+        
+        .performance-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .performance-table .best {
+            background: #d4edda;
+            font-weight: 600;
+        }
+        
+        .performance-table .best td {
+            color: #155724;
+        }
+        
+        .model-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .model-tag.ann {
+            background: #667eea;
+            color: white;
+        }
+        
+        .model-tag.rf {
+            background: #28a745;
+            color: white;
+        }
+        
+        .model-tag.svm {
+            background: #ffc107;
+            color: #333;
+        }
+        
+		.model-tag.xgb {
+            background: #ffc137;
+            color: #333;
+        }
+		
+        .model-tag.lr {
+            background: #dc3545;
+            color: white;
+        }
+        
+        /* Action Buttons */
+        .actions {
+            text-align: center;
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255,255,255,0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-3px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-3px);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+        }
+        
+        .footer a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Feature Highlights */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .feature-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-item:hover {
+            background: #e9ecef;
+            transform: scale(1.02);
+        }
+        
+        .feature-item .emoji {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .feature-item .label {
+            font-size: 0.9rem;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                text-align: center;
+            }
+        }
+        
+        /* Status indicator */
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .status.online {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-dot.online {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.offline {
+            background: #dc3545;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <span style="width: 200px; height: 200px; top: 10%; left: 5%; animation-delay: 0s;"></span>
+        <span style="width: 150px; height: 150px; top: 60%; right: 10%; animation-delay: 3s;"></span>
+        <span style="width: 250px; height: 250px; bottom: 20%; left: 20%; animation-delay: 6s;"></span>
+        <span style="width: 100px; height: 100px; top: 30%; right: 30%; animation-delay: 9s;"></span>
+        <span style="width: 180px; height: 180px; bottom: 40%; right: 5%; animation-delay: 12s;"></span>
+    </div>
+    
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Neonatal Risk Prediction</h1>
+            <p class="subtitle">Advanced Machine Learning System for Neonatal Health Risk Assessment</p>
+            <div class="badge">
+                {% if model_loaded %}
+                <span class="status online">
+                    <span class="status-dot online"></span>
+                    Model Active
+                </span>
+                {% else %}
+                <span class="status offline">
+                    <span class="status-dot offline"></span>
+                    Model Loading...
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- About System -->
+            <div class="card">
+                <h2>
+                    <span class="icon">📋</span>
+                    About This System
+                </h2>
+                <p>
+                    This <strong>clinical decision support system</strong> uses 
+                    <strong class="highlight">Artificial Neural Networks</strong> 
+                    to predict neonatal risk levels based on maternal and clinical factors.
+                </p>
+                <p>
+                    <strong>The Purpose:</strong> This system is designed for 
+                    <strong>research and practical usage</strong> to assist healthcare 
+                    professionals in identifying high-risk neonatal cases early.
+                </p>
+                <p>
+                    <strong>Research Context:</strong> Part of ongoing research 
+                    to improve neonatal health outcomes through AI-driven predictive analytics.
+                </p>
+                <div style="margin-top: 15px;">
+                    <span class="status online">
+                        <span class="status-dot online"></span>
+                        Research Grade System
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Model Selection -->
+            <div class="card">
+                <h2>
+                    <span class="icon"></span>
+                    Best Performing Model
+                </h2>
+                <p>
+                    After extensive evaluation of <strong>5 different machine learning models</strong>, 
+                    the <strong class="highlight">Artificial Neural Network (ANN)</strong> 
+                    was selected for deployment due to its superior performance.
+                </p>
+                <div style="margin-top: 15px; background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                    <h4 style="color: #333; margin-bottom: 10px;">📊 Model Performance Comparison</h4>
+                    <table class="performance-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Accuracy</th>
+                                <th>Precision</th>
+                                <th>Recall</th>
+                                <th>F1-Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="best">
+                                <td>
+                                    <span class="model-tag ann">ANN</span>
+                                    <strong>✅ Selected</strong>
+                                </td>
+                                <td>99.34%</td>
+                                <td>98.86%</td>
+                                <td>99.26%</td>
+                                <td>99.06%</td>
+                            </tr>
+                            <tr>
+                                <td><span class="model-tag rf">Random Forest</span></td>
+                                <td>98.61%</td>
+                                <td>98.03%</td>
+                                <td>98.00%</td>
+                                <td>98.01%</td>
+                            </tr>
+                            <tr>
+                                <td><span class="model-tag svm">SVM</span></td>
+                                <td>98.65%</td>
+                                <td>96.96%</td>
+                                <td>99.26%</td>
+                                <td>98.09%</td>
+                            </tr>
+                            <tr>
+                                <td><span class="model-tag lr">Logistic Regression</span></td>
+                                <td>99.08%</td>
+                                <td>97.92%</td>
+                                <td>99.49%</td>
+                                <td>98.70%</td>
+                            </tr>
+							    <tr>
+                                <td><span class="model-tag xgb">XGBoost</span></td>
+                                <td>98.18%</td>
+                                <td>96.03%</td>
+                                <td>98.89%</td>
+                                <td>97.44%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+                        <strong>ANN outperformed all other models</strong> with 99.34% accuracy and 99.97% AUC-ROC
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features Grid -->
+        <div class="card" style="margin-bottom: 30px;">
+            <h2 style="text-align: center;">
+                <span class="icon">⚡</span>
+                System Features
+            </h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <span class="emoji">🧠</span>
+                    <span class="label">ANN Model (99.34% Accuracy)</span>
+                </div>
+                <div class="feature-item">
+                    <span class="emoji">🔍</span>
+                    <span class="label">SHAP Explainability</span>
+                </div>
+                <div class="feature-item">
+                    <span class="emoji">📊</span>
+                    <span class="label">Real-time Predictions</span>
+                </div>
+                <div class="feature-item">
+                    <span class="emoji">📄</span>
+                    <span class="label">PDF Report Generation</span>
+                </div>
+                <div class="feature-item">
+                    <span class="emoji">🔐</span>
+                    <span class="label">Secure User Authentication</span>
+                </div>
+                <div class="feature-item">
+                    <span class="emoji">📈</span>
+                    <span class="label">Interactive Visualizations</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Model Details -->
+        <div class="card" style="margin-bottom: 30px;">
+            <h2>
+                <span class="icon">📚</span>
+                Why ANN Was Selected
+            </h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">Superior Performance</h4>
+                    <p style="color: #666; font-size: 0.95rem; line-height: 1.6;">
+                        ANN achieved the highest accuracy (99.34%) and AUC-ROC (99.97%) 
+                        among all tested models, making it the most reliable for clinical 
+                        decision support.
+                    </p>
+                </div>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">🎯 Feature Learning</h4>
+                    <p style="color: #666; font-size: 0.95rem; line-height: 1.6;">
+                        ANN excels at capturing complex non-linear relationships between 
+                        maternal health factors and neonatal outcomes, providing more 
+                        accurate risk assessments.
+                    </p>
+                </div>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">🔄 Scalability</h4>
+                    <p style="color: #666; font-size: 0.95rem; line-height: 1.6;">
+                        ANN models can be easily updated with new data and scaled 
+                        to handle increasing complexity as more features are added.
+                    </p>
+                </div>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">🧪 Research Ready</h4>
+                    <p style="color: #666; font-size: 0.95rem; line-height: 1.6;">
+                        The ANN architecture supports ongoing research with 
+                        interpretability features (SHAP) and reproducible predictions.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Call to Action -->
+        <div class="actions">
+            <a href="{{ url_for('login') }}" class="btn btn-primary">
+                🔑 Login to System
+            </a>
+            <a href="{{ url_for('register') }}" class="btn btn-secondary">
+                📝 Register New Account
+            </a>
+            <a href="{{ url_for('about') }}" class="btn btn-secondary">
+                📖 Learn More
+            </a>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 40px;">
+            <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 10px; padding: 20px; text-align: center;">
+                <div style="font-size: 2rem; color: white;">94.7%</div>
+                <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">Model Accuracy</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 10px; padding: 20px; text-align: center;">
+                <div style="font-size: 2rem; color: white;">14</div>
+                <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">Input Features</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 10px; padding: 20px; text-align: center;">
+                <div style="font-size: 2rem; color: white;">4</div>
+                <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">Models Compared</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 10px; padding: 20px; text-align: center;">
+                <div style="font-size: 2rem; color: white;">SHAP</div>
+                <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">Explainability</div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                <strong>Neonatal Risk Prediction System</strong> — 
+                <a href="{{ url_for('about') }}">Research & Practical Application</a>
+            </p>
+            <p style="font-size: 0.8rem; margin-top: 10px;">
+                ⚠ <strong>Disclaimer:</strong> This is a clinical decision support tool for research purposes. 
+                Always consult with qualified healthcare professionals.
+            </p>
+            <p style="font-size: 0.8rem; margin-top: 5px;">
+                © 2026 Neonatal Risk Prediction System | Design for AISHA MAHUTA
+            </p>
+        </div>
+    </div>
+</body>
+</html>
