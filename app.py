@@ -5,6 +5,7 @@ import shap
 import matplotlib.pyplot as plt
 import os
 import random
+import sys
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from flask_sqlalchemy import SQLAlchemy
@@ -32,8 +33,17 @@ app = Flask(__name__)
 # ==========================================
 # AUTHENTICATION CONFIGURATION
 # ==========================================
-app.config['SECRET_KEY'] = 'neonatal_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'neonatal_secret_key')
+
+# Use environment variable for database in production
+if os.environ.get('RENDER'):
+    # Use PostgreSQL on Render (if you add a PostgreSQL database)
+    # For now, use SQLite (will be temporary on Render)
+    db_path = '/tmp/users.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -46,7 +56,7 @@ os.makedirs("static", exist_ok=True)
 os.makedirs("reports", exist_ok=True)
 
 # ==========================================
-# USER MODEL (without created_at to avoid migration issues)
+# USER MODEL
 # ==========================================
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,7 +64,6 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    # Removed created_at to avoid migration issues
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -63,24 +72,26 @@ def load_user(user_id):
     except:
         return None
 
-# Initialize database with error handling
+# Initialize database
 with app.app_context():
     try:
         db.create_all()
         print("✅ Database initialized successfully!")
     except Exception as e:
         print(f"⚠️ Database error: {e}")
-        print("Attempting to recreate database...")
-        # If there's an error, drop all tables and recreate
-        db.drop_all()
-        db.create_all()
-        print("✅ Database recreated successfully!")
+        try:
+            db.drop_all()
+            db.create_all()
+            print("✅ Database recreated successfully!")
+        except Exception as e2:
+            print(f"❌ Failed to recreate database: {e2}")
 
 # =========================
 # LOAD ARTIFACTS
 # =========================
 model_loaded = False
 try:
+    # Try to load from current directory
     model = joblib.load("model.pkl")
     scaler = joblib.load("scaler.pkl")
     selector = joblib.load("selector.pkl")
@@ -90,7 +101,6 @@ try:
     medication_enc = joblib.load("encoders/medication.pkl")
     therapy_enc = joblib.load("encoders/therapy.pkl")
     
-    # SHAP EXPLAINER
     explainer = shap.Explainer(model)
     model_loaded = True
     print("✅ All model files loaded successfully!")
@@ -161,15 +171,12 @@ MODEL_METRICS = {
 }
 
 # =========================
-# WELCOME PAGE
+# ROUTES
 # =========================
 @app.route('/')
 def home():
     return render_template('welcome.html', model_loaded=model_loaded)
 
-# ==========================================
-# USER REGISTRATION
-# ==========================================
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -206,9 +213,6 @@ def register():
     
     return render_template("register.html")
 
-# ==========================================
-# USER LOGIN
-# ==========================================
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -228,9 +232,6 @@ def login():
     
     return render_template("login.html")
 
-# ==========================================
-# LOGOUT
-# ==========================================
 @app.route('/logout')
 @login_required
 def logout():
@@ -238,9 +239,6 @@ def logout():
     flash("You have been logged out.")
     return redirect(url_for('home'))
 
-# ==========================================
-# DASHBOARD
-# ==========================================
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -249,16 +247,10 @@ def dashboard():
         username=current_user.fullname
     )
 
-# ==========================================
-# ABOUT PAGE
-# ==========================================
 @app.route('/about')
 def about():
     return render_template('about.html', metrics=MODEL_METRICS)
 
-# =========================
-# PREDICTION ROUTE
-# =========================
 @app.route('/predict', methods=['POST'])
 @login_required
 def predict():
@@ -267,9 +259,9 @@ def predict():
             flash("Model not loaded. Please check model files.")
             return redirect(url_for('dashboard'))
         
-        # =========================
-        # INPUT COLLECTION
-        # =========================
+        # Input collection and prediction logic (same as before)
+        # ... [keep your existing prediction code]
+        
         age = float(request.form['age'])
         bmi = float(request.form['bmi'])
         seizure = float(request.form['seizure'])
@@ -287,33 +279,20 @@ def predict():
         medication = medication_enc.transform([request.form['medication']])[0]
         therapy = therapy_enc.transform([request.form['therapy']])[0]
         
-        # =========================
-        # FEATURE VECTOR
-        # =========================
         X = np.array([[age, bmi, education, epilepsy,
                        seizure, duration, medication,
                        dosage, therapy, gest_age,
                        hypertension, diabetes,
                        smoking, alcohol]])
         
-        # =========================
-        # PREPROCESSING
-        # =========================
         X_scaled = scaler.transform(X)
         X_selected = selector.transform(X_scaled)
         
-        # Get selected feature names
         selected_features = np.array(feature_names)[selector.get_support()]
         
-        # =========================
-        # MODEL PREDICTION
-        # =========================
         prob = model.predict_proba(X_selected)[0][1]
         pred = model.predict(X_selected)[0]
         
-        # =========================
-        # RISK CLASSIFICATION
-        # =========================
         if prob < 0.3:
             risk_level = "LOW RISK"
             color = "green"
@@ -324,9 +303,6 @@ def predict():
             risk_level = "HIGH RISK"
             color = "red"
         
-        # =========================
-        # SHAP EXPLANATION
-        # =========================
         shap_text = "SHAP explanation not available"
         waterfall_path = None
         bar_path = None
@@ -336,15 +312,11 @@ def predict():
                 shap_values = explainer(X_selected)
                 sv = shap_values[0]
                 
-                # Handle multi-class output
                 if len(sv.values.shape) > 1:
                     sv = sv[:, 1]
                 
                 sv.feature_names = selected_features
                 
-                # =========================
-                # WATERFALL PLOT
-                # =========================
                 plt.figure(figsize=(10, 6))
                 shap.plots.waterfall(sv, show=False, max_display=10)
                 waterfall_filename = f"waterfall_{random.randint(1000,9999)}.png"
@@ -352,9 +324,6 @@ def predict():
                 plt.savefig(waterfall_path, bbox_inches='tight', dpi=100)
                 plt.close()
                 
-                # =========================
-                # BAR PLOT
-                # =========================
                 plt.figure(figsize=(10, 6))
                 shap.plots.bar(sv, show=False, max_display=10)
                 bar_filename = f"bar_{random.randint(1000,9999)}.png"
@@ -362,9 +331,6 @@ def predict():
                 plt.savefig(bar_path, bbox_inches='tight', dpi=100)
                 plt.close()
                 
-                # =========================
-                # SHAP TEXT EXPLANATION
-                # =========================
                 shap_vals = sv.values
                 idx = np.argsort(np.abs(shap_vals))[::-1]
                 
@@ -381,9 +347,6 @@ def predict():
                 print(f"SHAP error: {e}")
                 shap_text = "SHAP explanation could not be generated"
         
-        # =========================
-        # PDF REPORT GENERATION
-        # =========================
         report_filename = f"Neonatal_Report_{random.randint(1000,9999)}.pdf"
         report_path = os.path.join("reports", report_filename)
         
@@ -418,9 +381,6 @@ def predict():
             print(f"PDF generation error: {e}")
             report_path = None
         
-        # =========================
-        # RETURN RESULT PAGE DATA
-        # =========================
         return render_template(
             "result.html",
             prediction=int(pred),
@@ -437,9 +397,6 @@ def predict():
         flash(f"Error during prediction: {str(e)}")
         return redirect(url_for('dashboard'))
 
-# =========================
-# DOWNLOAD REPORT ROUTE
-# =========================
 @app.route('/download_report/<path:filename>')
 @login_required
 def download_report(filename):
@@ -453,4 +410,5 @@ def download_report(filename):
 # RUN APP
 # =========================
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
