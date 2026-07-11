@@ -9,3 +9,7 @@ imbalanced-learn
 shap
 matplotlib
 reportlab
+flask
+flask_sqlalchemy
+flask_login
+werkzeug
