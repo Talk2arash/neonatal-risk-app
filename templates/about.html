@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Neonatal Risk Prediction System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { color: #333; font-size: 2.5rem; }
+        .header p { color: #666; font-size: 1.2rem; }
+        .section { margin-bottom: 30px; }
+        .section h2 { color: #667eea; margin-bottom: 15px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
+        .section p { color: #555; line-height: 1.8; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px; }
+        .metric-card { background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #667eea; }
+        .metric-card h4 { color: #333; margin-bottom: 10px; }
+        .metric-card table { width: 100%; }
+        .metric-card td { padding: 5px 0; color: #666; }
+        .metric-card .value { float: right; font-weight: 600; }
+        .btn { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; transition: all 0.3s; }
+        .btn:hover { background: #5a67d8; transform: translateY(-2px); }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #f0f2f5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📖 About This System</h1>
+            <p>Neonatal Risk Prediction using Artificial Neural Networks</p>
+        </div>
+        
+        <div class="section">
+            <h2>🎯 Project Overview</h2>
+            <p>
+                This system was developed as part of a research initiative to leverage 
+                <strong>Artificial Intelligence</strong> and <strong>Machine Learning</strong> 
+                for early detection of neonatal health risks. The goal is to provide 
+                healthcare professionals with a reliable decision support tool that can 
+                identify high-risk cases based on maternal and clinical factors.
+            </p>
+        </div>
+        
+        <div class="section">
+            <h2>🧠 Model Architecture</h2>
+            <p>
+                The deployed model is a <strong>Feedforward Artificial Neural Network (ANN)</strong> 
+                with the following architecture:
+            </p>
+            <ul style="margin: 15px 0 15px 20px; color: #555; line-height: 2;">
+                <li>Input Layer: 14 features (after feature selection)</li>
+                <li>Hidden Layer 1: 64 neurons (ReLU activation)</li>
+                <li>Hidden Layer 2: 32 neurons (ReLU activation)</li>
+                <li>Output Layer: 2 neurons (Softmax activation)</li>
+                <li>Optimizer: Adam</li>
+                <li>Loss Function: Categorical Crossentropy</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>📊 Performance Metrics</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h4>Artificial Neural Network (ANN) ✅</h4>
+                    <table>
+                        <tr><td>Accuracy</td><td class="value">99.34%</td></tr>
+                        <tr><td>Precision</td><td class="value">98.86%</td></tr>
+                        <tr><td>Recall</td><td class="value">99.26%</td></tr>
+                        <tr><td>F1-Score</td><td class="value">99.06%</td></tr>
+                        <tr><td>AUC-ROC</td><td class="value">99.97%</td></tr>
+                    </table>
+                </div>
+                <div class="metric-card">
+                    <h4>Random Forest</h4>
+                    <table>
+                        <tr><td>Accuracy</td><td class="value">98.61%</td></tr>
+                        <tr><td>Precision</td><td class="value">98.03%</td></tr>
+                        <tr><td>Recall</td><td class="value">98.00%</td></tr>
+                        <tr><td>F1-Score</td><td class="value">98.01%</td></tr>
+                        <tr><td>AUC-ROC</td><td class="value">99.88%</td></tr>
+                    </table>
+                </div>
+                <div class="metric-card">
+                    <h4>Support Vector Machine</h4>
+                    <table>
+                        <tr><td>Accuracy</td><td class="value">98.65%</td></tr>
+                        <tr><td>Precision</td><td class="value">96.96%</td></tr>
+                        <tr><td>Recall</td><td class="value">99.26%</td></tr>
+                        <tr><td>F1-Score</td><td class="value">98.09%</td></tr>
+                        <tr><td>AUC-ROC</td><td class="value">99.88%</td></tr>
+                    </table>
+                </div>
+                <div class="metric-card">
+                    <h4>Logistic Regression</h4>
+                    <table>
+                        <tr><td>Accuracy</td><td class="value">99.08%</td></tr>
+                        <tr><td>Precision</td><td class="value">97.92%</td></tr>
+                        <tr><td>Recall</td><td class="value">99.49%</td></tr>
+                        <tr><td>F1-Score</td><td class="value">98.70%</td></tr>
+                        <tr><td>AUC-ROC</td><td class="value">99.91%</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🔍 Explainability with SHAP</h2>
+            <p>
+                The system uses <strong>SHAP (SHapley Additive exPlanations)</strong> 
+                to provide interpretable explanations for each prediction. This helps 
+                clinicians understand which factors contributed most to the risk assessment, 
+                enabling more informed decision-making.
+            </p>
+        </div>
+        
+        <div class="section">
+            <h2>📋 Input Features</h2>
+            <p>The model uses the following 14 features for prediction:</p>
+            <ul style="margin: 15px 0 15px 20px; color: #555; line-height: 2; columns: 2;">
+                <li>Age</li>
+                <li>BMI</li>
+                <li>Education</li>
+                <li>Epilepsy Type</li>
+                <li>Seizure Frequency</li>
+                <li>Duration</li>
+                <li>Medication</li>
+                <li>Dosage</li>
+                <li>Therapy Type</li>
+                <li>Gestational Age</li>
+                <li>Hypertension</li>
+                <li>Diabetes</li>
+                <li>Smoking</li>
+                <li>Alcohol</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>⚠️ Important Notice</h2>
+            <p>
+                <strong>This system is designed for research and practical usage.</strong> 
+                While it achieves high accuracy, it should be used as a <strong>clinical 
+                decision support tool</strong> and not as a replacement for professional 
+                medical judgment. Always consult with qualified healthcare providers 
+                for clinical decisions.
+            </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{{ url_for('home') }}" class="btn">🏠 Back to Home</a>
+            <a href="{{ url_for('login') }}" class="btn" style="margin-left: 10px;">🔑 Login</a>
+            <a href="{{ url_for('register') }}" class="btn btn-secondary" style="margin-left: 10px;">📝 Register</a>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Neonatal Risk Prediction System | Design for AISHA MAHUTA</p>
+        </div>
+    </div>
+</body>
+</html>
